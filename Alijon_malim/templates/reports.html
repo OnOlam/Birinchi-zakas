@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisobotlar - Davomat Statistikasi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Filter Section */
+        .filter-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .quick-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-filter-btn {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .quick-filter-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .quick-filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .custom-date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .date-label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 0.9rem;
+        }
+
+        .date-input {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .apply-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .stat-card.present {
+            border-left: 4px solid #10b981;
+        }
+
+        .stat-card.present .stat-value {
+            color: #10b981;
+        }
+
+        .stat-card.absent {
+            border-left: 4px solid #ef4444;
+        }
+
+        .stat-card.absent .stat-value {
+            color: #ef4444;
+        }
+
+        .stat-card.total {
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card.total .stat-value {
+            color: #667eea;
+        }
+
+        .stat-card.percentage {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .stat-card.percentage .stat-value {
+            color: #f59e0b;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Group Stats */
+        .group-stats {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .group-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .group-item:last-child {
+            border-bottom: none;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .group-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .group-percentage {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .group-details {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Daily Stats Table */
+        .daily-stats {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .custom-date-range {
+                grid-template-columns: 1fr;
+            }
+
+            .group-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .group-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 Hisobotlar</h1>
+            <a href="/dashboard" class="back-btn">🏠 Bosh sahifa</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Filter Section -->
+        <div class="filter-card">
+            <h2 class="filter-title">🔍 Sana bo'yicha filtrlash</h2>
+            
+            <div class="quick-filters">
+                <button class="quick-filter-btn active" onclick="applyQuickFilter('today')">
+                    📅 Bugun
+                </button>
+                <button class="quick-filter-btn" onclick="applyQuickFilter('yesterday')">
+                    📆 Kecha
+                </button>
+                <button class="quick-filter-btn" onclick="applyQuickFilter('week')">
+                    📊 7 kun
+                </button>
+                <button class="quick-filter-btn" onclick="applyQuickFilter('month')">
+                    📈 30 kun
+                </button>
+            </div>
+
+            <div class="custom-date-range">
+                <div class="date-group">
+                    <label class="date-label">Boshlanish sanasi</label>
+                    <input type="date" id="startDate" class="date-input" value="{{ start_date }}">
+                </div>
+                <div class="date-group">
+                    <label class="date-label">Tugash sanasi</label>
+                    <input type="date" id="endDate" class="date-input" value="{{ end_date }}">
+                </div>
+            </div>
+
+            <button class="apply-btn" onclick="applyCustomFilter()">
+                🔍 Qidirish
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Yuklanmoqda...</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div id="statsContent">
+            <div class="stats-grid">
+                <div class="stat-card present">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="presentCount">{{ stats.total_present }}</div>
+                    <div class="stat-label">Kelgan talabalar</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ stats.attendance_percentage }}%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card absent">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-value" id="absentCount">{{ stats.total_absent }}</div>
+                    <div class="stat-label">Kelmagan talabalar</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ stats.absence_percentage }}%; background: linear-gradient(90deg, #ef4444, #f87171);"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card total">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalCount">{{ stats.total_records }}</div>
+                    <div class="stat-label">Jami yozuvlar</div>
+                </div>
+
+                <div class="stat-card percentage">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value" id="percentageValue">{{ "%.1f"|format(stats.attendance_percentage) }}%</div>
+                    <div class="stat-label">Davomat foizi</div>
+                </div>
+            </div>
+
+            <!-- Group Statistics -->
+            {% if group_stats %}
+            <div class="group-stats">
+                <h2 class="section-title">
+                    <span>📁</span>
+                    <span>Guruhlar bo'yicha statistika</span>
+                </h2>
+
+                {% for group in group_stats %}
+                <div class="group-item">
+                    <div class="group-header">
+                        <div class="group-name">{{ group.group_name }}</div>
+                        <div class="group-percentage">{{ "%.1f"|format(group.percentage) }}%</div>
+                    </div>
+                    <div class="group-details">
+                        <div class="detail-item">
+                            <span>✅ Kelgan:</span>
+                            <strong>{{ group.present }}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>❌ Kelmagan:</span>
+                            <strong>{{ group.absent }}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>📊 Jami:</span>
+                            <strong>{{ group.total }}</strong>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ group.percentage }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Daily Breakdown -->
+            {% if daily_stats %}
+            <div class="daily-stats">
+                <h2 class="section-title">
+                    <span>📅</span>
+                    <span>Kunlik tafsilotlar</span>
+                </h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Kelgan</th>
+                            <th>Kelmagan</th>
+                            <th>Jami</th>
+                            <th>Foiz</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in daily_stats %}
+                        <tr>
+                            <td><strong>{{ day.date }}</strong></td>
+                            <td><span class="badge badge-success">✅ {{ day.present }}</span></td>
+                            <td><span class="badge badge-danger">❌ {{ day.absent }}</span></td>
+                            <td><strong>{{ day.total }}</strong></td>
+                            <td><strong>{{ "%.1f"|format(day.percentage) }}%</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Empty State -->
+            {% if stats.total_records == 0 %}
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <h3>Ma'lumot topilmadi</h3>
+                <p>Tanlangan sana oralig'ida davomat ma'lumotlari yo'q</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Bugungi sana
+        const today = new Date().toISOString().split('T')[0];
+
+        // Quick filter
+        function applyQuickFilter(type) {
+            let startDate, endDate;
+            const todayDate = new Date();
+
+            // Active button
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            switch(type) {
+                case 'today':
+                    startDate = endDate = today;
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(todayDate);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    startDate = endDate = yesterday.toISOString().split('T')[0];
+                    break;
+                case 'week':
+                    const weekAgo = new Date(todayDate);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    startDate = weekAgo.toISOString().split('T')[0];
+                    endDate = today;
+                    break;
+                case 'month':
+                    const monthAgo = new Date(todayDate);
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    startDate = monthAgo.toISOString().split('T')[0];
+                    endDate = today;
+                    break;
+            }
+
+            document.getElementById('startDate').value = startDate;
+            document.getElementById('endDate').value = endDate;
+
+            // Apply filter
+            loadReports(startDate, endDate);
+        }
+
+        // Custom filter
+        function applyCustomFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Iltimos sanalarni tanlang!');
+                return;
+            }
+
+            if (startDate > endDate) {
+                alert('Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas!');
+                return;
+            }
+
+            // Deactivate quick buttons
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            loadReports(startDate, endDate);
+        }
+
+        // Load reports via AJAX
+        async function loadReports(startDate, endDate) {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('statsContent');
+
+            // Show loading
+            loading.style.display = 'block';
+            content.style.opacity = '0.5';
+
+            try {
+                const response = await fetch(`/reports/data?start_date=${startDate}&end_date=${endDate}`);
+                const data = await response.json();
+
+                // Update stats
+                updateStats(data);
+
+                // Hide loading
+                loading.style.display = 'none';
+                content.style.opacity = '1';
+
+            } catch (error) {
+                console.error('Xatolik:', error);
+                alert('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+                loading.style.display = 'none';
+                content.style.opacity = '1';
+            }
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            // Reload page with parameters
+            const url = new URL(window.location.href);
+            url.searchParams.set('start_date', document.getElementById('startDate').value);
+            url.searchParams.set('end_date', document.getElementById('endDate').value);
+            window.location.href = url.toString();
+        }
+
+        // Initialize dates on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startDate = urlParams.get('start_date') || today;
+            const endDate = urlParams.get('end_date') || today;
+
+            document.getElementById('startDate').value = startDate;
+            document.getElementById('endDate').value = endDate;
+        });
+    </script>
+</body>
+</html>
