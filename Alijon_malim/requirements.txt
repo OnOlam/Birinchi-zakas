@@ -1,31 +1,10 @@
 # Flask Core
-#Flask==3.0.0
-#Werkzeug==3.0.1
-
-# Database
-#Flask-SQLAlchemy==3.1.1
-#SQLAlchemy==2.0.23
-
-# Production Server
-#gunicorn==21.2.0
-
-# Environment Variables
-#python-dotenv==1.0.0
-
-# Security
-#itsdangerous==2.1.2
-
-# Date/Time
-#python-dateutil==2.8.2
-
-
-# Flask Core (2.3.3 eng barqaror)
 Flask==2.3.3
 Werkzeug==2.3.7
 
-# Database (muhim!)
-Flask-SQLAlchemy==3.0.5  # ← bu versiya SQLAlchemy 2.0 bilan ishlaydi
-SQLAlchemy==2.0.23
+# Database
+Flask-SQLAlchemy==2.5.1
+SQLAlchemy==1.4.49
 
 # Production Server
 gunicorn==21.2.0
@@ -38,6 +17,3 @@ itsdangerous==2.1.2
 
 # Date/Time
 python-dateutil==2.8.2
-
-# Qo'shimcha (agar kerak bo'lsa)
-Jinja2==3.1.2
