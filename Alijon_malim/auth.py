@@ -18,13 +18,13 @@ import hashlib
 ADMIN_CREDENTIALS = {
     'username': 'admin',
     # Parol: admin123 (hash qilingan)
-    'password_hash': generate_password_hash('admin123')
+    'password_hash': generate_password_hash('928100796')
 }
 
-# Production uchun environment variable ishlatish kerak:
-# import os
-# ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-# ADMIN_PASSWORD_HASH = generate_password_hash(os.getenv('ADMIN_PASSWORD', 'admin123'))
+Production uchun environment variable ishlatish kerak:
+import os
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD_HASH = generate_password_hash(os.getenv('ADMIN_PASSWORD', '928100796'))
 
 
 # ==========================================
