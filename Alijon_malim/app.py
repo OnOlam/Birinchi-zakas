@@ -19,31 +19,47 @@ from config import get_config
 # FLASK APP SOZLAMALARI
 # ==========================================
 
+# Database obyekti
+db = SQLAlchemy()
+
 def create_app(config_name=None):
     """
     Flask Application Factory
-    
+
     Args:
         config_name: 'development', 'production', or 'testing'
-    
+
     Returns:
         Configured Flask app
     """
     app = Flask(__name__)
-    
+
     # Load configuration
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
+
+    # ASOSIY O'ZGARISH: Tashqi PostgreSQL ulash
+    if config_name == 'production':
+        # Render'da - PostgreSQL
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('postgresql://lkt_db_user:hx0lD48SARzQStOl4aVMN7pQEomtP0n1@dpg-d5ht2gtactks73977bp0-a.virginia-postgres.render.com/lkt_db')
+    else:
+        # Localda - SQLite
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
     
-    config_class = get_config(config_name)
-    app.config.from_object(config_class)
-    
-    # Initialize extensions
-    init_db(app)
-    init_auth(app)
-    
-    # Register blueprints (agar kerak bo'lsa)
-    # register_blueprints(app)
+    # Umumiy sozlamalar
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-123')
+
+    # Initialize database
+    db.init_app(app)
+
+    # Modellarni yaratish
+    with app.app_context():
+        db.create_all()
+        print("✅ Database yaratildi/ulandi")
+
+    # Auth init (agar kerak bo'lsa)
+    # init_auth(app)  # Bu funksiyangiz bor bo'lsa
     
     return app
 
