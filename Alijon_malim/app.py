@@ -1094,16 +1094,35 @@ def revoke_all_sessions():
 # ERROR HANDLERS
 # ==========================================
 
+# 404 xatosi uchun handler
 @app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+def not_found_error(error):
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head><title>404 - Sahifa topilmadi</title></head>
+    <body style="text-align: center; padding: 50px;">
+        <h1>📄 404 - Sahifa topilmadi</h1>
+        <p>Kechirasiz, siz qidirgan sahifa mavjud emas.</p>
+        <a href="/login">Login sahifasiga qaytish</a>
+    </body>
+    </html>
+    """, 404
 
-
+# 500 xatosi uchun handler
 @app.errorhandler(500)
-def internal_error(e):
-    db.session.rollback()
-    return render_template('500.html'), 500
-
+def internal_error(error):
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head><title>500 - Server xatosi</title></head>
+    <body style="text-align: center; padding: 50px;">
+        <h1>⚠️ 500 - Server xatosi</h1>
+        <p>Serverda ichki xatolik yuz berdi.</p>
+        <a href="/login">Login sahifasiga qaytish</a>
+    </body>
+    </html>
+    """, 500
 
 # ==========================================
 # DEVELOPMENT SERVER
