@@ -4,28 +4,27 @@ Xavfsiz login tizimi - Token-based authentication
 """
 
 from functools import wraps
-from flask import session, redirect, url_for, flash, request, make_response
+from flask import session, redirect, url_for, flash, request
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 import secrets
 import hashlib
+import os  # os modulini import qilish
 
 
 # ==========================================
-# ADMIN MA'LUMOTLARI (oldindan belgilangan)
+# ADMIN MA'LUMOTLARI
 # ==========================================
 
-ADMIN_CREDENTIALS = {
-    'username': 'admin',
-    # Parol: admin123 (hash qilingan)
-    'password_hash': generate_password_hash('928100796')
-}
-
-Production uchun environment variable ishlatish kerak:
-import os
+# Production uchun environment variable ishlatish kerak:
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD_HASH = generate_password_hash(os.getenv('ADMIN_PASSWORD', '928100796'))
 
+# Yoki oddiy test versiyasi (faqat development uchun):
+# ADMIN_CREDENTIALS = {
+#     'username': 'admin',
+#     'password_hash': generate_password_hash('928100796')
+# }
 
 # ==========================================
 # COOKIE SOZLAMALARI
