@@ -394,7 +394,10 @@
     <div class="header">
         <div class="header-content">
             <h1>📚 Admin Panel</h1>
-            <a href="/logout" class="logout-btn">🚪 Chiqish</a>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="/dashboard" class="logout-btn">🏠 Bosh sahifa</a>
+                <a href="/logout" class="logout-btn">🚪 Chiqish</a>
+            </div>
         </div>
     </div>
 
@@ -513,6 +516,12 @@
                                required minlength="2" maxlength="100">
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Otchestvo (Sharif)</label>
+                        <input type="text" name="middle_name" class="form-input" 
+                               placeholder="Masalan: Akbarovich" 
+                               minlength="2" maxlength="100">
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Familiya *</label>
                         <input type="text" name="last_name" class="form-input" 
                                placeholder="Masalan: Valiyev" 
@@ -558,7 +567,7 @@
                                 <tr>
                                     <td>{{ loop.index }}</td>
                                     <td>
-                                        <strong>{{ student.full_name }}</strong>
+                                        <strong>{{ student.full_name_with_middle }}</strong>
                                     </td>
                                     <td>
                                         <span class="badge badge-primary">
@@ -575,7 +584,7 @@
                                     <td>
                                         <div class="action-buttons">
                                             <form method="POST" action="/admin/student/{{ student.id }}/delete" 
-                                                  onsubmit="return confirm('{{ student.full_name }} ni o\'chirmoqchimisiz?');" 
+                                                  onsubmit="return confirm('{{ student.full_name_with_middle }} ni o\'chirmoqchimisiz?');" 
                                                   style="display: inline;">
                                                 <button type="submit" class="btn btn-danger btn-small">
                                                     🗑️ O'chirish
@@ -635,4 +644,3 @@
     </script>
 </body>
 </html>
-

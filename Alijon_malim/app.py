@@ -3,7 +3,7 @@ Flask Application - Attendance Management System
 Davomatni boshqarish tizimi - Asosiy fayl
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session,make_response, jsonify
 from datetime import datetime, timedelta
 import os
 
@@ -13,26 +13,67 @@ from auth import (
     check_login, login_user, logout_user, 
     login_required, is_logged_in, init_auth
 )
+from config import get_config
 
 # ==========================================
 # FLASK APP SOZLAMALARI
 # ==========================================
 
-app = Flask(__name__)
+def create_app(config_name=None):
+    """
+    Flask Application Factory
+    
+    Args:
+        config_name: 'development', 'production', or 'testing'
+    
+    Returns:
+        Configured Flask app
+    """
+    app = Flask(__name__)
+    
+    # Load configuration
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+    
+    config_class = get_config(config_name)
+    app.config.from_object(config_class)
+    
+    # Initialize extensions
+    init_db(app)
+    init_auth(app)
+    
+    # Register blueprints (agar kerak bo'lsa)
+    # register_blueprints(app)
+    
+    return app
 
-# Database konfiguratsiyasi
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Secret key (Production'da environment variable ishlatish kerak!)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-me')
+# Create app instance
+app = create_app()
 
-# Session konfiguratsiyasi
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
-# Database'ni ishga tushirish
-init_db(app)
-init_auth(app)
+# ==========================================
+# BEFORE FIRST REQUEST
+# ==========================================
+
+@app.before_request
+def create_tables():
+    """
+    Create database tables before first request
+    """
+    db.create_all()
+
+
+# ==========================================
+# JINJA FILTERS (Optional)
+# ==========================================
+
+@app.template_filter('format_date')
+def format_date_filter(date, format='%d.%m.%Y'):
+    """Format date for templates"""
+    if date:
+        return date.strftime(format)
+    return ''
 
 
 # ==========================================
@@ -52,26 +93,55 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
-    Login sahifasi
+    Login sahifasi - Secure token-based authentication
     GET: Login formani ko'rsatish
     POST: Login ma'lumotlarini tekshirish
     """
-    # Agar allaqachon login qilgan bo'lsa
+    from auth import (
+        try_auto_login, get_client_info, 
+        create_remember_me_token, rate_limit_check
+    )
+    
+    # Auto-login tekshirish (cookie orqali)
+    if try_auto_login():
+        return redirect(url_for('dashboard'))
+    
+    # Agar session orqali login qilgan bo'lsa
     if is_logged_in():
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
+        remember_me = request.form.get('remember_me') == 'on'
+        
+        # Rate limiting tekshirish
+        if not rate_limit_check():
+            flash('Juda ko\'p urinish! Iltimos biroz kutib turing. ⏳', 'danger')
+            return render_template('login.html')
         
         # Login tekshirish
         if check_login(username, password):
-            login_user(username)
-            flash('Xush kelibsiz! 👋', 'success')
+            # Session yaratish
+            login_user(username, login_method='password')
             
-            # Agar oldingi sahifa bo'lsa - u yerga qaytish
+            # Redirect response yaratish
             next_url = session.pop('next_url', None)
-            return redirect(next_url or url_for('dashboard'))
+            response = make_response(redirect(next_url or url_for('dashboard')))
+            
+            # "Remember Me" token yaratish
+            if remember_me:
+                user_agent, ip_address = get_client_info()
+                response = create_remember_me_token(
+                    response,
+                    user_agent=user_agent,
+                    ip_address=ip_address
+                )
+                flash('Xush kelibsiz! Qurilma eslab qolindi. 🔐', 'success')
+            else:
+                flash('Xush kelibsiz! 👋', 'success')
+            
+            return response
         else:
             flash('Username yoki parol noto\'g\'ri! ❌', 'danger')
     
@@ -82,12 +152,24 @@ def login():
 @login_required
 def logout():
     """
-    Logout - tizimdan chiqish
+    Logout - tizimdan chiqish va tokenni bekor qilish
     """
+    from auth import revoke_remember_me_token
+    
     username = session.get('username')
+    
+    # Session tozalash
     logout_user()
+    
+    # Response yaratish
+    response = make_response(redirect(url_for('login')))
+    
+    # Remember me tokenni bekor qilish
+    response = revoke_remember_me_token(response)
+    
     flash(f'{username}, tizimdan muvaffaqiyatli chiqdingiz! 👋', 'info')
-    return redirect(url_for('login'))
+    
+    return response
 
 
 # ==========================================
@@ -643,107 +725,214 @@ def bulk_mark_attendance():
 
 
 # ==========================================
-# HISOBOTLAR
+# HISOBOTLAR VA EXCEL EXPORT
 # ==========================================
 
 @app.route('/reports')
 @login_required
 def reports():
     """
-    Hisobotlar sahifasi - to'liq statistika
+    Hisobotlar sahifasi - sana tanlash
     """
-    from sqlalchemy import func
+    from datetime import date
     
-    # Sana oralig'ini olish (URL parametrlaridan yoki default)
-    start_date_str = request.args.get('start_date')
-    end_date_str = request.args.get('end_date')
-    
-    today = datetime.now().date()
-    
-    if start_date_str and end_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            start_date = end_date = today
-    else:
-        start_date = end_date = today
-    
-    # Umumiy statistika
-    query = Attendance.query.filter(
-        Attendance.date >= start_date,
-        Attendance.date <= end_date
-    )
-    
-    total_records = query.count()
-    total_present = query.filter_by(status='present').count()
-    total_absent = query.filter_by(status='absent').count()
-    
-    attendance_percentage = (total_present / total_records * 100) if total_records > 0 else 0
-    absence_percentage = (total_absent / total_records * 100) if total_records > 0 else 0
-    
-    stats = {
-        'total_records': total_records,
-        'total_present': total_present,
-        'total_absent': total_absent,
-        'attendance_percentage': round(attendance_percentage, 1),
-        'absence_percentage': round(absence_percentage, 1)
-    }
-    
-    # Guruhlar bo'yicha statistika
-    group_stats = []
-    groups = Group.query.all()
-    
-    for group in groups:
-        group_query = db.session.query(Attendance).join(Student).filter(
-            Student.group_id == group.id,
-            Attendance.date >= start_date,
-            Attendance.date <= end_date
-        )
-        
-        group_total = group_query.count()
-        group_present = group_query.filter(Attendance.status == 'present').count()
-        group_absent = group_query.filter(Attendance.status == 'absent').count()
-        
-        if group_total > 0:
-            group_stats.append({
-                'group_name': group.name,
-                'total': group_total,
-                'present': group_present,
-                'absent': group_absent,
-                'percentage': round(group_present / group_total * 100, 1)
-            })
-    
-    # Kunlik statistika
-    daily_stats = []
-    current_date = start_date
-    
-    while current_date <= end_date:
-        day_query = Attendance.query.filter_by(date=current_date)
-        day_total = day_query.count()
-        day_present = day_query.filter_by(status='present').count()
-        day_absent = day_query.filter_by(status='absent').count()
-        
-        if day_total > 0:
-            daily_stats.append({
-                'date': current_date.strftime('%d.%m.%Y'),
-                'total': day_total,
-                'present': day_present,
-                'absent': day_absent,
-                'percentage': round(day_present / day_total * 100, 1)
-            })
-        
-        current_date += timedelta(days=1)
-    
-    # Sanalarni reverse qilish (eng yangi birinchi)
-    daily_stats.reverse()
+    today = date.today()
     
     return render_template('reports.html',
-                         stats=stats,
-                         group_stats=group_stats,
-                         daily_stats=daily_stats,
-                         start_date=start_date.strftime('%Y-%m-%d'),
-                         end_date=end_date.strftime('%Y-%m-%d'))
+                         selected_date=today.strftime('%Y-%m-%d'),
+                         groups_report=None)
+
+
+@app.route('/reports/view')
+@login_required
+def reports_view():
+    """
+    Tanlangan sana bo'yicha hisobotni ko'rsatish
+    """
+    date_str = request.args.get('date')
+    
+    if not date_str:
+        flash('Iltimos sana tanlang! ⚠️', 'warning')
+        return redirect(url_for('reports'))
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        flash('Noto\'g\'ri sana formati! ❌', 'danger')
+        return redirect(url_for('reports'))
+    
+    # Barcha guruhlar bo'yicha hisobot
+    groups = Group.query.all()
+    groups_report = []
+    
+    for group in groups:
+        # Guruhning o'sha sanada davomat ma'lumotlari
+        students = Student.query.filter_by(
+            group_id=group.id,
+            active=True
+        ).all()
+        
+        students_data = []
+        present_count = 0
+        absent_count = 0
+        
+        for student in students:
+            # Talabaning o'sha sanada davomati
+            attendance = Attendance.query.filter_by(
+                student_id=student.id,
+                date=selected_date
+            ).first()
+            
+            status = None
+            if attendance:
+                status = attendance.status
+                if status == 'present':
+                    present_count += 1
+                elif status == 'absent':
+                    absent_count += 1
+            
+            students_data.append({
+                'student_id': student.id,
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'status': status
+            })
+        
+        total = len(students_data)
+        percentage = (present_count / total * 100) if total > 0 else 0
+        
+        if total > 0:  # Faqat talabasi bor guruhlar
+            groups_report.append({
+                'group_id': group.id,
+                'group_name': group.name,
+                'students': students_data,
+                'total': total,
+                'present': present_count,
+                'absent': absent_count,
+                'percentage': round(percentage, 1)
+            })
+    
+    return render_template('reports.html',
+                         selected_date=date_str,
+                         groups_report=groups_report)
+
+
+@app.route('/reports/export')
+@login_required
+def reports_export():
+    """
+    Excel hisobotni yuklab olish
+    """
+    from flask import send_file
+    from export import AttendanceExcelExporter, generate_filename
+    
+    date_str = request.args.get('date')
+    group_id = request.args.get('group_id', type=int)
+    
+    if not date_str:
+        flash('Iltimos sana tanlang! ⚠️', 'warning')
+        return redirect(url_for('reports'))
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        flash('Noto\'g\'ri sana formati! ❌', 'danger')
+        return redirect(url_for('reports'))
+    
+    exporter = AttendanceExcelExporter()
+    
+    # Agar muayyan guruh tanlangan bo'lsa
+    if group_id:
+        group = Group.query.get_or_404(group_id)
+        
+        # Guruh talabalarini olish
+        students = Student.query.filter_by(
+            group_id=group_id,
+            active=True
+        ).all()
+        
+        students_data = []
+        for student in students:
+            attendance = Attendance.query.filter_by(
+                student_id=student.id,
+                date=selected_date
+            ).first()
+            
+            students_data.append({
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'status': attendance.status if attendance else None
+            })
+        
+        # Excel yaratish
+        excel_file = exporter.export_group_report(
+            selected_date,
+            group.name,
+            students_data
+        )
+        
+        filename = generate_filename('davomat', selected_date, group.name)
+    
+    else:
+        # Barcha guruhlar uchun
+        groups = Group.query.all()
+        groups_data = []
+        
+        for group in groups:
+            students = Student.query.filter_by(
+                group_id=group.id,
+                active=True
+            ).all()
+            
+            if not students:
+                continue
+            
+            students_data = []
+            present_count = 0
+            absent_count = 0
+            
+            for student in students:
+                attendance = Attendance.query.filter_by(
+                    student_id=student.id,
+                    date=selected_date
+                ).first()
+                
+                status = attendance.status if attendance else None
+                
+                if status == 'present':
+                    present_count += 1
+                elif status == 'absent':
+                    absent_count += 1
+                
+                students_data.append({
+                    'first_name': student.first_name,
+                    'last_name': student.last_name,
+                    'status': status
+                })
+            
+            groups_data.append({
+                'group_name': group.name,
+                'students': students_data,
+                'total': len(students_data),
+                'present': present_count,
+                'absent': absent_count
+            })
+        
+        # Excel yaratish
+        excel_file = exporter.export_daily_report(
+            selected_date,
+            groups_data
+        )
+        
+        filename = generate_filename('davomat_hisobot', selected_date)
+    
+    # Excel faylni yuborish
+    return send_file(
+        excel_file,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )
 
 
 @app.route('/reports/data')
@@ -830,6 +1019,75 @@ def student_report(student_id):
                          attendance_history=attendance_history,
                          start_date=start_date,
                          end_date=end_date)
+
+
+# ==========================================
+# XAVFSIZLIK VA SESSION BOSHQARUVI
+# ==========================================
+
+@app.route('/security/sessions')
+@login_required
+def security_sessions():
+    """
+    Aktiv sessionlarni ko'rish va boshqarish
+    """
+    from models import AdminToken
+    from security import get_all_sessions
+    from auth import REMEMBER_ME_COOKIE_NAME
+    
+    # Barcha aktiv sessionlar
+    sessions = get_all_sessions()
+    
+    # Joriy sessionni belgilash
+    current_selector = None
+    cookie_value = request.cookies.get(REMEMBER_ME_COOKIE_NAME)
+    if cookie_value and ':' in cookie_value:
+        current_selector = cookie_value.split(':', 1)[0]
+    
+    # Joriy sessionni belgilash
+    for session_info in sessions:
+        token = AdminToken.query.get(session_info['id'])
+        if token and token.selector == current_selector:
+            session_info['is_current'] = True
+    
+    return render_template('security_sessions.html', sessions=sessions)
+
+
+@app.route('/security/revoke/<int:session_id>', methods=['POST'])
+@login_required
+def revoke_session(session_id):
+    """
+    Muayyan sessionni bekor qilish
+    """
+    from security import revoke_session as revoke_sess
+    
+    if revoke_sess(session_id):
+        flash('Session bekor qilindi! 🔒', 'success')
+    else:
+        flash('Session topilmadi! ❌', 'danger')
+    
+    return redirect(url_for('security_sessions'))
+
+
+@app.route('/security/revoke-all', methods=['POST'])
+@login_required
+def revoke_all_sessions():
+    """
+    Joriy sessiondan tashqari barcha sessionlarni bekor qilish
+    """
+    from security import revoke_all_sessions_except_current
+    from auth import REMEMBER_ME_COOKIE_NAME
+    
+    # Joriy selector
+    current_selector = None
+    cookie_value = request.cookies.get(REMEMBER_ME_COOKIE_NAME)
+    if cookie_value and ':' in cookie_value:
+        current_selector = cookie_value.split(':', 1)[0]
+    
+    count = revoke_all_sessions_except_current(current_selector)
+    
+    flash(f'{count} ta session bekor qilindi! 🔒', 'success')
+    return redirect(url_for('security_sessions'))
 
 
 # ==========================================

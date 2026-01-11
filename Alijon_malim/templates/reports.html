@@ -18,7 +18,6 @@
             line-height: 1.6;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -53,14 +52,12 @@
             font-size: 0.9rem;
         }
 
-        /* Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 1rem;
         }
 
-        /* Filter Section */
         .filter-card {
             background: white;
             border-radius: 12px;
@@ -76,55 +73,28 @@
             color: #2c3e50;
         }
 
-        .quick-filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .quick-filter-btn {
-            padding: 0.75rem;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .quick-filter-btn:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .quick-filter-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .custom-date-range {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .date-group {
+        .date-filter-group {
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .date-input-wrapper {
+            flex: 1;
+            min-width: 200px;
         }
 
         .date-label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 600;
             color: #34495e;
             font-size: 0.9rem;
         }
 
         .date-input {
+            width: 100%;
             padding: 0.75rem;
             border: 2px solid #e1e8ed;
             border-radius: 8px;
@@ -137,7 +107,7 @@
         }
 
         .apply-btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -145,190 +115,150 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 1rem;
         }
 
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: #6b7280;
-            font-size: 0.95rem;
+        .export-btn {
+            padding: 0.75rem 2rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
-        }
-
-        .stat-card.present {
-            border-left: 4px solid #10b981;
-        }
-
-        .stat-card.present .stat-value {
-            color: #10b981;
-        }
-
-        .stat-card.absent {
-            border-left: 4px solid #ef4444;
-        }
-
-        .stat-card.absent .stat-value {
-            color: #ef4444;
-        }
-
-        .stat-card.total {
-            border-left: 4px solid #667eea;
-        }
-
-        .stat-card.total .stat-value {
-            color: #667eea;
-        }
-
-        .stat-card.percentage {
-            border-left: 4px solid #f59e0b;
-        }
-
-        .stat-card.percentage .stat-value {
-            color: #f59e0b;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-
-        /* Group Stats */
-        .group-stats {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #2c3e50;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .group-item {
-            padding: 1rem;
-            border-bottom: 1px solid #f0f0f0;
+        .export-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
         }
 
-        .group-item:last-child {
-            border-bottom: none;
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .group-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .group-card.expanded {
+            grid-column: 1 / -1;
+            border-left-color: #10b981;
         }
 
         .group-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .group-name {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: #2c3e50;
         }
 
-        .group-percentage {
-            font-size: 1.2rem;
+        .group-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+
+        .stat-item.present {
+            background: #d1fae5;
+        }
+
+        .stat-item.absent {
+            background: #fee2e2;
+        }
+
+        .stat-item.total {
+            background: #dbeafe;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #667eea;
+            margin-bottom: 0.25rem;
         }
 
-        .group-details {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.9rem;
+        .stat-label {
+            font-size: 0.85rem;
             color: #6b7280;
-            margin-bottom: 0.5rem;
         }
 
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        /* Daily Stats Table */
-        .daily-stats {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow-x: auto;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            transition: width 0.5s ease;
         }
 
-        table {
+        .students-list {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .students-list.show {
+            display: block;
+        }
+
+        .students-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 1rem;
         }
 
-        th {
+        .students-table th {
             background: #f8f9fa;
-            padding: 1rem;
+            padding: 0.75rem;
             text-align: left;
             font-weight: 600;
-            color: #2c3e50;
             border-bottom: 2px solid #e1e8ed;
         }
 
-        td {
-            padding: 1rem;
+        .students-table td {
+            padding: 0.75rem;
             border-bottom: 1px solid #f0f0f0;
         }
 
-        tr:hover {
+        .students-table tr:hover {
             background: #f8f9fa;
         }
 
-        .badge {
+        .status-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
@@ -336,17 +266,16 @@
             font-weight: 600;
         }
 
-        .badge-success {
+        .status-badge.present {
             background: #d1fae5;
             color: #065f46;
         }
 
-        .badge-danger {
+        .status-badge.absent {
             background: #fee2e2;
             color: #991b1b;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
@@ -358,82 +287,47 @@
             margin-bottom: 1rem;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 2rem;
+        .toggle-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
         }
 
-        .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.2rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .stat-card {
-                padding: 1rem;
-            }
-
-            .stat-value {
-                font-size: 2rem;
-            }
-
-            .custom-date-range {
+            .groups-grid {
                 grid-template-columns: 1fr;
             }
 
-            .group-header {
+            .group-stats {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
             }
 
-            .group-details {
+            .date-filter-group {
                 flex-direction: column;
-                gap: 0.5rem;
             }
 
-            table {
+            .date-input-wrapper {
+                width: 100%;
+            }
+
+            .apply-btn, .export-btn {
+                width: 100%;
+            }
+
+            .students-table {
                 font-size: 0.85rem;
             }
 
-            th, td {
-                padding: 0.75rem 0.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .quick-filters {
-                grid-template-columns: repeat(2, 1fr);
+            .students-table th, .students-table td {
+                padding: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="header-content">
             <h1>📊 Hisobotlar</h1>
@@ -441,275 +335,140 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Filter Section -->
         <div class="filter-card">
-            <h2 class="filter-title">🔍 Sana bo'yicha filtrlash</h2>
+            <h2 class="filter-title">🔍 Sana tanlash</h2>
             
-            <div class="quick-filters">
-                <button class="quick-filter-btn active" onclick="applyQuickFilter('today')">
-                    📅 Bugun
-                </button>
-                <button class="quick-filter-btn" onclick="applyQuickFilter('yesterday')">
-                    📆 Kecha
-                </button>
-                <button class="quick-filter-btn" onclick="applyQuickFilter('week')">
-                    📊 7 kun
-                </button>
-                <button class="quick-filter-btn" onclick="applyQuickFilter('month')">
-                    📈 30 kun
-                </button>
-            </div>
-
-            <div class="custom-date-range">
-                <div class="date-group">
-                    <label class="date-label">Boshlanish sanasi</label>
-                    <input type="date" id="startDate" class="date-input" value="{{ start_date }}">
+            <form method="GET" action="/reports/view" id="filterForm">
+                <div class="date-filter-group">
+                    <div class="date-input-wrapper">
+                        <label class="date-label">Sana</label>
+                        <input type="date" 
+                               name="date" 
+                               id="reportDate"
+                               class="date-input" 
+                               value="{{ selected_date }}"
+                               required>
+                    </div>
+                    
+                    <button type="submit" class="apply-btn">
+                        🔍 Ko'rish
+                    </button>
+                    
+                    <button type="button" class="export-btn" onclick="exportToExcel()">
+                        📥 Excel yuklab olish
+                    </button>
                 </div>
-                <div class="date-group">
-                    <label class="date-label">Tugash sanasi</label>
-                    <input type="date" id="endDate" class="date-input" value="{{ end_date }}">
-                </div>
-            </div>
-
-            <button class="apply-btn" onclick="applyCustomFilter()">
-                🔍 Qidirish
-            </button>
+            </form>
         </div>
 
-        <!-- Loading -->
-        <div class="loading" id="loading" style="display: none;">
-            <div class="spinner"></div>
-            <p>Yuklanmoqda...</p>
+        {% if groups_report %}
+        <div class="groups-grid" id="groupsGrid">
+            {% for group in groups_report %}
+            <div class="group-card" id="group-{{ group.group_id }}" onclick="toggleGroup({{ group.group_id }})">
+                <div class="group-header">
+                    <div class="group-name">📁 {{ group.group_name }}</div>
+                    <div class="toggle-icon" id="icon-{{ group.group_id }}">▼</div>
+                </div>
+
+                <div class="group-stats">
+                    <div class="stat-item present">
+                        <div class="stat-value" style="color: #10b981;">{{ group.present }}</div>
+                        <div class="stat-label">Kelgan</div>
+                    </div>
+                    <div class="stat-item absent">
+                        <div class="stat-value" style="color: #ef4444;">{{ group.absent }}</div>
+                        <div class="stat-label">Kelmagan</div>
+                    </div>
+                    <div class="stat-item total">
+                        <div class="stat-value" style="color: #667eea;">{{ group.total }}</div>
+                        <div class="stat-label">Jami</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ group.percentage }}%"></div>
+                </div>
+                <div style="text-align: center; margin-top: 0.5rem; font-weight: 600; color: #667eea;">
+                    {{ "%.1f"|format(group.percentage) }}%
+                </div>
+
+                <div class="students-list" id="students-{{ group.group_id }}">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ism Familiya</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in group.students %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                                <td>
+                                    {% if student.status == 'present' %}
+                                        <span class="status-badge present">✅ Keldi</span>
+                                    {% elif student.status == 'absent' %}
+                                        <span class="status-badge absent">❌ Kelmadi</span>
+                                    {% else %}
+                                        <span class="status-badge">⏳ Belgilanmagan</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-
-        <!-- Stats Cards -->
-        <div id="statsContent">
-            <div class="stats-grid">
-                <div class="stat-card present">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-value" id="presentCount">{{ stats.total_present }}</div>
-                    <div class="stat-label">Kelgan talabalar</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ stats.attendance_percentage }}%"></div>
-                    </div>
-                </div>
-
-                <div class="stat-card absent">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-value" id="absentCount">{{ stats.total_absent }}</div>
-                    <div class="stat-label">Kelmagan talabalar</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ stats.absence_percentage }}%; background: linear-gradient(90deg, #ef4444, #f87171);"></div>
-                    </div>
-                </div>
-
-                <div class="stat-card total">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-value" id="totalCount">{{ stats.total_records }}</div>
-                    <div class="stat-label">Jami yozuvlar</div>
-                </div>
-
-                <div class="stat-card percentage">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-value" id="percentageValue">{{ "%.1f"|format(stats.attendance_percentage) }}%</div>
-                    <div class="stat-label">Davomat foizi</div>
-                </div>
-            </div>
-
-            <!-- Group Statistics -->
-            {% if group_stats %}
-            <div class="group-stats">
-                <h2 class="section-title">
-                    <span>📁</span>
-                    <span>Guruhlar bo'yicha statistika</span>
-                </h2>
-
-                {% for group in group_stats %}
-                <div class="group-item">
-                    <div class="group-header">
-                        <div class="group-name">{{ group.group_name }}</div>
-                        <div class="group-percentage">{{ "%.1f"|format(group.percentage) }}%</div>
-                    </div>
-                    <div class="group-details">
-                        <div class="detail-item">
-                            <span>✅ Kelgan:</span>
-                            <strong>{{ group.present }}</strong>
-                        </div>
-                        <div class="detail-item">
-                            <span>❌ Kelmagan:</span>
-                            <strong>{{ group.absent }}</strong>
-                        </div>
-                        <div class="detail-item">
-                            <span>📊 Jami:</span>
-                            <strong>{{ group.total }}</strong>
-                        </div>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ group.percentage }}%"></div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Daily Breakdown -->
-            {% if daily_stats %}
-            <div class="daily-stats">
-                <h2 class="section-title">
-                    <span>📅</span>
-                    <span>Kunlik tafsilotlar</span>
-                </h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Sana</th>
-                            <th>Kelgan</th>
-                            <th>Kelmagan</th>
-                            <th>Jami</th>
-                            <th>Foiz</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for day in daily_stats %}
-                        <tr>
-                            <td><strong>{{ day.date }}</strong></td>
-                            <td><span class="badge badge-success">✅ {{ day.present }}</span></td>
-                            <td><span class="badge badge-danger">❌ {{ day.absent }}</span></td>
-                            <td><strong>{{ day.total }}</strong></td>
-                            <td><strong>{{ "%.1f"|format(day.percentage) }}%</strong></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
-
-            <!-- Empty State -->
-            {% if stats.total_records == 0 %}
-            <div class="empty-state">
-                <div class="empty-icon">📊</div>
-                <h3>Ma'lumot topilmadi</h3>
-                <p>Tanlangan sana oralig'ida davomat ma'lumotlari yo'q</p>
-            </div>
-            {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>Ma'lumot topilmadi</h3>
+            <p>Tanlangan sanada davomat ma'lumotlari yo'q</p>
         </div>
+        {% endif %}
     </div>
 
     <script>
-        // Bugungi sana
-        const today = new Date().toISOString().split('T')[0];
-
-        // Quick filter
-        function applyQuickFilter(type) {
-            let startDate, endDate;
-            const todayDate = new Date();
-
-            // Active button
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            switch(type) {
-                case 'today':
-                    startDate = endDate = today;
-                    break;
-                case 'yesterday':
-                    const yesterday = new Date(todayDate);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    startDate = endDate = yesterday.toISOString().split('T')[0];
-                    break;
-                case 'week':
-                    const weekAgo = new Date(todayDate);
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    startDate = weekAgo.toISOString().split('T')[0];
-                    endDate = today;
-                    break;
-                case 'month':
-                    const monthAgo = new Date(todayDate);
-                    monthAgo.setDate(monthAgo.getDate() - 30);
-                    startDate = monthAgo.toISOString().split('T')[0];
-                    endDate = today;
-                    break;
-            }
-
-            document.getElementById('startDate').value = startDate;
-            document.getElementById('endDate').value = endDate;
-
-            // Apply filter
-            loadReports(startDate, endDate);
+        // Guruhni ochish/yopish
+        function toggleGroup(groupId) {
+            const card = document.getElementById(`group-${groupId}`);
+            const studentsList = document.getElementById(`students-${groupId}`);
+            const icon = document.getElementById(`icon-${groupId}`);
+            
+            // Toggle expanded class
+            card.classList.toggle('expanded');
+            studentsList.classList.toggle('show');
+            icon.classList.toggle('rotated');
+            
+            // Event propagation to'xtatish
+            event.stopPropagation();
         }
 
-        // Custom filter
-        function applyCustomFilter() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            if (!startDate || !endDate) {
-                alert('Iltimos sanalarni tanlang!');
+        // Excel export
+        function exportToExcel() {
+            const date = document.getElementById('reportDate').value;
+            
+            if (!date) {
+                alert('Iltimos sana tanlang!');
                 return;
             }
-
-            if (startDate > endDate) {
-                alert('Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas!');
-                return;
-            }
-
-            // Deactivate quick buttons
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            loadReports(startDate, endDate);
+            
+            // Excel yuklab olish
+            window.location.href = `/reports/export?date=${date}`;
         }
 
-        // Load reports via AJAX
-        async function loadReports(startDate, endDate) {
-            const loading = document.getElementById('loading');
-            const content = document.getElementById('statsContent');
-
-            // Show loading
-            loading.style.display = 'block';
-            content.style.opacity = '0.5';
-
-            try {
-                const response = await fetch(`/reports/data?start_date=${startDate}&end_date=${endDate}`);
-                const data = await response.json();
-
-                // Update stats
-                updateStats(data);
-
-                // Hide loading
-                loading.style.display = 'none';
-                content.style.opacity = '1';
-
-            } catch (error) {
-                console.error('Xatolik:', error);
-                alert('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
-                loading.style.display = 'none';
-                content.style.opacity = '1';
-            }
-        }
-
-        // Update statistics
-        function updateStats(data) {
-            // Reload page with parameters
-            const url = new URL(window.location.href);
-            url.searchParams.set('start_date', document.getElementById('startDate').value);
-            url.searchParams.set('end_date', document.getElementById('endDate').value);
-            window.location.href = url.toString();
-        }
-
-        // Initialize dates on page load
+        // Bugungi sanani default qilib qo'yish
         document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startDate = urlParams.get('start_date') || today;
-            const endDate = urlParams.get('end_date') || today;
-
-            document.getElementById('startDate').value = startDate;
-            document.getElementById('endDate').value = endDate;
+            const dateInput = document.getElementById('reportDate');
+            if (!dateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
         });
     </script>
 </body>

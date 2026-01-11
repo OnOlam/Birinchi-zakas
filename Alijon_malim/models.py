@@ -1,12 +1,142 @@
 """
 Database models for Attendance Management System
-SQLAlchemy ORM bilan yozilgan
+SQLAlchemy ORM bilan yozilgan + Secure Token System
 """
 
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
+import hashlib
 
 db = SQLAlchemy()
+
+
+class AdminToken(db.Model):
+    """
+    Admin "Remember Me" tokenlarini saqlash
+    Xavfsiz authentication uchun
+    """
+    __tablename__ = 'admin_tokens'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    token_hash = db.Column(db.String(256), unique=True, nullable=False, index=True)
+    selector = db.Column(db.String(64), unique=True, nullable=False, index=True)
+    user_agent = db.Column(db.String(500))
+    ip_address = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    last_used = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<AdminToken {self.selector}>'
+    
+    @staticmethod
+    def generate_token(user_agent=None, ip_address=None, remember_days=30):
+        """
+        Yangi "Remember Me" token yaratish
+        
+        Returns:
+            tuple: (selector, validator, token_object)
+        """
+        # Selector: Tokenni topish uchun
+        selector = secrets.token_urlsafe(32)
+        
+        # Validator: Tasdiqlash uchun (faqat bir marta ko'rsatiladi)
+        validator = secrets.token_urlsafe(32)
+        
+        # Validator'ni hash qilish (database'da saqlash uchun)
+        token_hash = hashlib.sha256(validator.encode()).hexdigest()
+        
+        # Expires date
+        expires_at = datetime.utcnow() + timedelta(days=remember_days)
+        
+        # Token object yaratish
+        token = AdminToken(
+            token_hash=token_hash,
+            selector=selector,
+            user_agent=user_agent,
+            ip_address=ip_address,
+            expires_at=expires_at
+        )
+        
+        db.session.add(token)
+        db.session.commit()
+        
+        return selector, validator, token
+    
+    @staticmethod
+    def verify_token(selector, validator):
+        """
+        Tokenni tekshirish
+        
+        Args:
+            selector: Token selector
+            validator: Token validator
+            
+        Returns:
+            bool: True agar token to'g'ri va amal qilsa
+        """
+        token = AdminToken.query.filter_by(selector=selector).first()
+        
+        if not token:
+            return False
+        
+        # Muddati tugaganmi tekshirish
+        if token.expires_at < datetime.utcnow():
+            db.session.delete(token)
+            db.session.commit()
+            return False
+        
+        # Hash'ni tekshirish
+        validator_hash = hashlib.sha256(validator.encode()).hexdigest()
+        
+        if token.token_hash == validator_hash:
+            # Last used yangilash
+            token.last_used = datetime.utcnow()
+            db.session.commit()
+            return True
+        
+        # Agar hash mos kelmasa, token o'chiriladi (xavfsizlik)
+        db.session.delete(token)
+        db.session.commit()
+        return False
+    
+    @staticmethod
+    def revoke_token(selector):
+        """
+        Tokenni bekor qilish (logout)
+        """
+        token = AdminToken.query.filter_by(selector=selector).first()
+        if token:
+            db.session.delete(token)
+            db.session.commit()
+            return True
+        return False
+    
+    @staticmethod
+    def cleanup_expired():
+        """
+        Muddati tugagan tokenlarni tozalash
+        """
+        expired = AdminToken.query.filter(
+            AdminToken.expires_at < datetime.utcnow()
+        ).all()
+        
+        for token in expired:
+            db.session.delete(token)
+        
+        db.session.commit()
+        return len(expired)
+    
+    @staticmethod
+    def revoke_all():
+        """
+        Barcha tokenlarni bekor qilish (xavfsizlik)
+        """
+        count = AdminToken.query.count()
+        AdminToken.query.delete()
+        db.session.commit()
+        return count
 
 
 class Group(db.Model):
@@ -44,6 +174,7 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
+    middle_name = db.Column(db.String(100))  # Otchestvo (sharif)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
     active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -57,8 +188,15 @@ class Student(db.Model):
     
     @property
     def full_name(self):
-        """To'liq ism"""
+        """To'liq ism (ism + familiya)"""
         return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def full_name_with_middle(self):
+        """To'liq ism sharif bilan (ism + otchestvo + familiya)"""
+        if self.middle_name:
+            return f"{self.first_name} {self.middle_name} {self.last_name}"
+        return self.full_name
     
     def to_dict(self):
         """JSON formatga o'tkazish uchun"""
@@ -66,7 +204,9 @@ class Student(db.Model):
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'middle_name': self.middle_name,
             'full_name': self.full_name,
+            'full_name_with_middle': self.full_name_with_middle,
             'group_id': self.group_id,
             'group_name': self.group.name if self.group else None,
             'active': self.active
