@@ -1,0 +1,253 @@
+/* ==================== GLOBAL STYLES ==================== */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ==================== CARDS ==================== */
+
+.card {
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ==================== TABLES ==================== */
+
+.table {
+    background-color: white;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+}
+
+/* ==================== BUTTONS ==================== */
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* ==================== FORMS ==================== */
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110,253, 0.25);
+}
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+/* ==================== NAVBAR ==================== */
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+.navbar-brand {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+.nav-link.active {
+    border-bottom: 3px solid white;
+}
+
+/* ==================== FOOTER ==================== */
+
+.footer {
+    margin-top: auto;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ==================== ALERTS ==================== */
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+.alert-dismissible .btn-close {
+    padding: 0.75rem;
+}
+
+/* ==================== BADGES ==================== */
+
+.badge {
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ==================== CUSTOM ANIMATIONS ==================== */
+
+@keyframes fadeIn {
+    from {
+    opacity: 0;
+    transform: translateY(-10px);
+    } 
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ==================== HOUR CELLS (Davomat jadval) ==================== */
+
+.hour-cell {
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.hour-cell:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    transform: scale(1.1);
+}
+.hour-cell:active {
+    transform: scale(0.95);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .card-header h4 {
+    font-size: 1.2rem;
+}
+.btn-lg {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+
+.table {
+    font-size: 0.85rem;
+}
+}
+
+/* ==================== LOADING SPINNER ==================== */
+
+.spinner-border-custom {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* ==================== LOGIN PAGE ==================== */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.login-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* ==================== DASHBOARD STATS CARDS ==================== */
+
+.stats-card {
+    transition: all 0.3s ease;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* ==================== HOVER EFFECTS ==================== */
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* ==================== SCROLLBAR ==================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+    .navbar,
+    .btn,
+    .alert,
+    .footer {
+    display: none !important;
+    }
+.card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+}
+}

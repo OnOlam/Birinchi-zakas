@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Davomat Tizimi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Real-time vaqt -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-clock"></i>
+                    <span id="live-time">{{ stats.current_datetime.strftime('%H:%M:%S') }}</span>
+                </h3>
+                <p class="mb-0">
+                    <i class="bi bi-calendar"></i>
+                    <span id="live-date">{{ stats.current_datetime.strftime('%d %B %Y, %A') }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistika kartalari -->
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Jami Talabalar</h6>
+                        <h2 class="mb-0">{{ stats.total_students }}</h2>
+                    </div>
+                    <i class="bi bi-people-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Guruhlar Soni</h6>
+                        <h2 class="mb-0">{{ stats.total_groups }}</h2>
+                    </div>
+                    <i class="bi bi-folder-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Bugun Keldi</h6>
+                        <h2 class="mb-0">{{ stats.present_today }}</h2>
+                        <small>{{ stats.present_percentage }}%</small>
+                    </div>
+                    <i class="bi bi-check-circle-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Bugun G'oyib</h6>
+                        <h2 class="mb-0">{{ stats.absent_today }}</h2>
+                    </div>
+                    <i class="bi bi-x-circle-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tezkor havolalar -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h4 class="mb-3">
+            <i class="bi bi-lightning-fill"></i> Tezkor Havolalar
+        </h4>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Talaba Qo'shish</h5>
+                <p class="card-text text-muted">Yangi talaba va guruh qo'shish</p>
+                <a href="{{ url_for('main.students_add') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> O'tish
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-clipboard-check-fill text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Davomat Belgilash</h5>
+                <p class="card-text text-muted">Bugungi davomatni belgilash</p>
+                <a href="{{ url_for('main.attendance_mark') }}" class="btn btn-success">
+                    <i class="bi bi-arrow-right"></i> O'tish
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-bar-chart-fill text-info" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Hisobotlar</h5>
+                <p class="card-text text-muted">Batafsil hisobotlarni ko'rish</p>
+                <a href="{{ url_for('main.reports_groups') }}" class="btn btn-info text-white">
+                    <i class="bi bi-arrow-right"></i> O'tish
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Real-time soat
+function updateTime() {
+    const now = new Date();
+    
+    // Vaqt
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('live-time').textContent = `${hours}:${minutes}:${seconds}`;
+    
+    // Sana
+    const options = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
+    const dateStr = now.toLocaleDateString('uz-UZ', options);
+    document.getElementById('live-date').textContent = dateStr;
+}
+
+// Har soniyada yangilash
+setInterval(updateTime, 1000);
+updateTime(); // Darhol ishga tushirish
+</script>
+{% endblock %}

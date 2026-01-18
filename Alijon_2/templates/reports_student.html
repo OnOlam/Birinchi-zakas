@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.full_name }} - To'liq Hisobot{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="mb-0">
+                            <i class="bi bi-person-circle"></i> {{ student.full_name }}
+                        </h4>
+                        <p class="mb-0 small">
+                            <i class="bi bi-folder"></i> {{ student.group.name }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ url_for('main.reports_group', group_id=student.group_id) }}" 
+                           class="btn btn-light btn-sm">
+                            <i class="bi bi-arrow-left"></i> Orqaga
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Jami g'oyiblar -->
+                <div class="alert alert-danger text-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Jami G'oyib: <strong>{{ total_absences }}</strong> soat
+                    </h3>
+                </div>
+                
+                <!-- Davomat tarixi -->
+                {% if history %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr class="text-center">
+                                    <th style="width: 15%;">SANA</th>
+                                    <th style="width: 50%;">SOATLAR</th>
+                                    <th style="width: 15%;">SANOGʻI</th>
+                                    <th style="width: 20%;">O'CHIRISH</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in history %}
+                                <tr data-attendance-id="{{ record.id }}">
+                                    <td class="text-center">
+                                        <strong>{{ record.date.strftime('%d.%m.%Y') }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ record.updated_at.strftime('%H:%M:%S') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% set hours = record.get_hours_list() %}
+                                        {% for i in range(7) %}
+                                            <span class="badge {% if hours[i] %}bg-success{% else %}bg-danger{% endif %} me-1"
+                                                  style="font-size: 1rem; cursor: pointer;"
+                                                  data-hour="{{ i + 1 }}"
+                                                  onclick="toggleHour({{ record.id }}, {{ i + 1 }}, this)">
+                                                {{ i + 1 }}-{% if hours[i] %}✅{% else %}❌{% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-center">
+                                        <strong class="text-success">{{ record.count_present() }}-✅</strong>,
+                                        <strong class="text-danger">{{ record.count_absent() }}-❌</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-warning" 
+                                                onclick="deleteAbsences({{ record.id }}, {{ record.count_absent() }})">
+                                            <i class="bi bi-eraser"></i> O'CHIRISH
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle"></i>
+                        Hali davomat belgilanmagan
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Soatni o'zgartirish (❌ → ✅)
+function toggleHour(attendanceId, hourNum, element) {
+    if (!element.classList.contains('bg-danger')) {
+        alert('Faqat g\'oyiblarni o\'chirish mumkin!');
+        return;
+    }
+    
+    if (!confirm('Bu soatni KELDI ga o\'zgartirmoqchimisiz?')) {
+        return;
+    }
+    
+    fetch(`{{ url_for('main.delete_absence_record', student_id=student.id) }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            attendance_id: attendanceId,
+            hour_num: hourNum
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Badge ni o'zgartirish
+            element.classList.remove('bg-danger');
+            element.classList.add('bg-success');
+            element.innerHTML = `${hourNum}-✅`;
+            
+            // Jami g'oyibni yangilash
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Xato:', error);
+        alert('Xatolik yuz berdi!');
+    });
+}
+
+// G'oyiblarni o'chirish
+function deleteAbsences(attendanceId, totalAbsent) {
+    if (totalAbsent === 0) {
+        alert('Bu sanada g\'oyib yo\'q!');
+        return;
+    }
+    
+    const count = prompt(`Nechta g'oyibni o'chirmoqchisiz? (Jami: ${totalAbsent})`, '1');
+    
+    if (count === null || count === '') return;
+    
+    const numCount = parseInt(count);
+    
+    if (isNaN(numCount) || numCount < 1 || numCount > totalAbsent) {
+        alert('Noto\'g\'ri qiymat!');
+        return;
+    }
+    
+    alert(`Endi ${numCount} ta ❌ belgini ✅ ga o'zgartirish uchun ustiga bosing`);
+}
+</script>
+{% endblock %}

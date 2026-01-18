@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Davomat Belgilash{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0">
+                            <i class="bi bi-clipboard-check"></i> Davomat Belgilash
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="bi bi-clock"></i> <span id="current-datetime">{{ current_datetime.strftime('%H:%M:%S - %d.%m.%Y') }}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Guruh tanlash -->
+                <form method="GET" class="mb-4">
+                    <div class="row align-items-end">
+                        <div class="col-md-8">
+                            <label for="group_id" class="form-label fw-bold">
+                                <i class="bi bi-folder"></i> Guruhni tanlang
+                            </label>
+                            <select class="form-select form-select-lg" 
+                                    id="group_id" 
+                                    name="group_id" 
+                                    onchange="this.form.submit()">
+                                <option value="">-- Guruhni tanlang --</option>
+                                {% for group in groups %}
+                                    <option value="{{ group.id }}" 
+                                            {% if group.id == selected_group_id %}selected{% endif %}>
+                                        {{ group.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Yuklash
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Agar guruh tanlanmagan bo'lsa -->
+                {% if not selected_group_id %}
+                    <div class="alert alert-warning text-center py-5">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">Guruhni tanlang</h4>
+                        <p class="mb-0">Davomat belgilash uchun yuqoridan guruhni tanlang</p>
+                    </div>
+                {% else %}
+                    <!-- Talabalar jadvali -->
+                    {% if students %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr class="text-center">
+                                        <th style="width: 3%;">№</th>
+                                        <th style="width: 12%;">ISM</th>
+                                        <th style="width: 12%;">FAMILIYA</th>
+                                        <th style="width: 12%;">OTCHESTVO</th>
+                                        <th style="width: 5%;">1</th>
+                                        <th style="width: 5%;">2</th>
+                                        <th style="width: 5%;">3</th>
+                                        <th style="width: 5%;">4</th>
+                                        <th style="width: 5%;">5</th>
+                                        <th style="width: 5%;">6</th>
+                                        <th style="width: 5%;">7</th>
+                                        <th style="width: 18%;">YORDAMCHI</th>
+                                        <th style="width: 8%;">BOSHQARISH</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr data-student-id="{{ student.id }}">
+                                        <td class="text-center">{{ loop.index }}</td>
+                                        <td>{{ student.first_name }}</td>
+                                        <td>{{ student.last_name }}</td>
+                                        <td>{{ student.patronymic }}</td>
+                                        
+                                        <!-- 7 ta soat -->
+                                        {% set hours = attendances.get(student.id, [None]*7) %}
+                                        {% for hour in range(7) %}
+                                            <td class="text-center hour-cell" 
+                                                data-hour="{{ hour }}" 
+                                                style="cursor: pointer; font-size: 1.5rem;">
+                                                {% if hours[hour] is none %}
+                                                    <span class="text-muted">-</span>
+                                                {% elif hours[hour] %}
+                                                    <span class="text-success">✅</span>
+                                                {% else %}
+                                                    <span class="text-danger">❌</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                        
+                                        <!-- Yordamchi tugmalar -->
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-success me-1 mark-all-present" 
+                                                    title="Hamma soatga KELDI">
+                                                <i class="bi bi-check-all"></i> KELDI
+                                            </button>
+                                            <button class="btn btn-sm btn-danger mark-all-absent" 
+                                                    title="Hamma soatga KELMADI">
+                                                <i class="bi bi-x-lg"></i> KELMADI
+                                            </button>
+                                        </td>
+                                        
+                                        <!-- O'chirish tugmasi -->
+                                        <td class="text-center">
+                                            <form method="POST" 
+                                                  action="{{ url_for('main.students_delete', student_id=student.id) }}" 
+                                                  onsubmit="return confirm('Talabani o\'chirmoqchimisiz?');"
+                                                  style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Talabani o'chirish">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Qo'llanma:</strong> 
+                            Katakchani bosing (✅/❌ almashtirish) | 
+                            KELDI tugma - hamma soatga ✅ | 
+                            KELMADI tugma - hamma soatga ❌
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning text-center">
+                            <i class="bi bi-exclamation-circle"></i>
+                            Bu guruhda hali talaba yo'q
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Real-time vaqt
+function updateCurrentTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    
+    const timeStr = `${hours}:${minutes}:${seconds} - ${day}.${month}.${year}`;
+    const element = document.getElementById('current-datetime');
+    if (element) {
+        element.textContent = timeStr;
+    }
+}
+
+setInterval(updateCurrentTime, 1000);
+updateCurrentTime();
+
+// Soat katakchasini bosish
+document.querySelectorAll('.hour-cell').forEach(cell => {
+    cell.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const studentId = row.dataset.studentId;
+        const hourIndex = parseInt(this.dataset.hour);
+        
+        // Hozirgi holatni olish
+        const currentIcon = this.querySelector('span');
+        let newValue;
+        
+        if (currentIcon.textContent === '✅') {
+            currentIcon.textContent = '❌';
+            currentIcon.className = 'text-danger';
+            newValue = false;
+        } else if (currentIcon.textContent === '❌') {
+            currentIcon.textContent = '✅';
+            currentIcon.className = 'text-success';
+            newValue = true;
+        } else {
+            currentIcon.textContent = '✅';
+            currentIcon.className = 'text-success';
+            newValue = true;
+        }
+        
+        // Serverga saqlash
+        saveAttendance(studentId, hourIndex, newValue);
+    });
+});
+
+// KELDI tugmasi
+document.querySelectorAll('.mark-all-present').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const studentId = row.dataset.studentId;
+        const hourCells = row.querySelectorAll('.hour-cell');
+        
+        hourCells.forEach(cell => {
+            const icon = cell.querySelector('span');
+            icon.textContent = '✅';
+            icon.className = 'text-success';
+        });
+        
+        // Serverga saqlash (hamma soatlar = true)
+        saveAttendanceAll(studentId, true);
+    });
+});
+
+// KELMADI tugmasi
+document.querySelectorAll('.mark-all-absent').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const studentId = row.dataset.studentId;
+        const hourCells = row.querySelectorAll('.hour-cell');
+        
+        hourCells.forEach(cell => {
+            const icon = cell.querySelector('span');
+            icon.textContent = '❌';
+            icon.className = 'text-danger';
+        });
+        
+        // Serverga saqlash (hamma soatlar = false)
+        saveAttendanceAll(studentId, false);
+    });
+});
+
+// Bitta soatni saqlash
+function saveAttendance(studentId, hourIndex, value) {
+    // Hozirgi barcha soatlarni olish
+    const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+    const hourCells = row.querySelectorAll('.hour-cell');
+    const hours = [];
+    
+    hourCells.forEach((cell, index) => {
+        const icon = cell.querySelector('span');
+        if (index === hourIndex) {
+            hours.push(value);
+        } else {
+            if (icon.textContent === '✅') hours.push(true);
+            else if (icon.textContent === '❌') hours.push(false);
+            else hours.push(null);
+        }
+    });
+    
+    sendToServer(studentId, hours);
+}
+
+// Hamma soatlarni saqlash
+function saveAttendanceAll(studentId, value) {
+    const hours = Array(7).fill(value);
+    sendToServer(studentId, hours);
+}
+
+// Serverga yuborish
+function sendToServer(studentId, hours) {
+    const currentDate = '{{ current_date }}';
+    
+    fetch('{{ url_for("main.attendance_mark") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            student_id: studentId,
+            date: currentDate,
+            hours: hours
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Saqlandi');
+        }
+    })
+    .catch(error => {
+        console.error('Xato:', error);
+        alert('Xatolik yuz berdi!');
+    });
+}
+</script>
+{% endblock %}
+

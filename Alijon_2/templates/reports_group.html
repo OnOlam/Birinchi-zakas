@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Hisobot - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0">
+                            <i class="bi bi-folder-open"></i> {{ group.name }}
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{{ url_for('main.reports_groups') }}" class="btn btn-light btn-sm">
+                            <i class="bi bi-arrow-left"></i> Orqaga
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Sana tanlash va Export -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <form method="GET" class="row g-2">
+                            <div class="col-auto">
+                                <label class="col-form-label fw-bold">
+                                    <i class="bi bi-calendar"></i> Sana:
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="date" 
+                                       class="form-control" 
+                                       name="date" 
+                                       value="{{ selected_date }}"
+                                       onchange="this.form.submit()">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-success" onclick="exportToExcel()">
+                            <i class="bi bi-file-earmark-excel"></i> Excel Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Talabalar jadvali -->
+                {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr class="text-center">
+                                    <th style="width: 3%;">№</th>
+                                    <th style="width: 15%;">ISM</th>
+                                    <th style="width: 15%;">FAMILIYA</th>
+                                    <th style="width: 15%;">OTCHESTVO</th>
+                                    <th style="width: 5%;">1</th>
+                                    <th style="width: 5%;">2</th>
+                                    <th style="width: 5%;">3</th>
+                                    <th style="width: 5%;">4</th>
+                                    <th style="width: 5%;">5</th>
+                                    <th style="width: 5%;">6</th>
+                                    <th style="width: 5%;">7</th>
+                                    <th style="width: 12%;">KO'RISH</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td class="text-center">{{ loop.index }}</td>
+                                    <td>{{ student.first_name }}</td>
+                                    <td>{{ student.last_name }}</td>
+                                    <td>{{ student.patronymic }}</td>
+                                    
+                                    <!-- 7 ta soat -->
+                                    {% set hours = attendances.get(student.id, [None]*7) %}
+                                    {% for hour in hours %}
+                                        <td class="text-center" style="font-size: 1.3rem;">
+                                            {% if hour is none %}
+                                                <span class="text-muted">-</span>
+                                            {% elif hour %}
+                                                <span class="text-success">✅</span>
+                                            {% else %}
+                                                <span class="text-danger">❌</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    
+                                    <!-- Ko'rish tugmasi -->
+                                    <td class="text-center">
+                                        <a href="{{ url_for('main.reports_student', student_id=student.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye"></i> KO'RISH
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Bu guruhda talaba yo'q
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportToExcel() {
+    const groupId = {{ group.id }};
+    const selectedDate = '{{ selected_date }}';
+    
+    // Sana oralig'ini so'rash (yoki oddiygina bugungi kun)
+    const startDate = prompt('Boshlanish sanasi (YYYY-MM-DD):', selectedDate);
+    const endDate = prompt('Tugash sanasi (YYYY-MM-DD):', selectedDate);
+    
+    if (startDate && endDate) {
+        window.location.href = `/export/group/${groupId}?start_date=${startDate}&end_date=${endDate}`;
+    }
+}
+</script>
+{% endblock %}

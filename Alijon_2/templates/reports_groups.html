@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Hisobotlar - Guruhlar{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-bar-chart"></i> Hisobotlar - Guruhlar
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if groups %}
+                    <div class="row">
+                        {% for group in groups %}
+                            <div class="col-md-4 col-lg-3 mb-3">
+                                <a href="{{ url_for('main.reports_group', group_id=group.id) }}" 
+                                   class="text-decoration-none">
+                                    <div class="card h-100 hover-shadow">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-folder-fill text-primary" style="font-size: 3rem;"></i>
+                                            <h5 class="card-title mt-3">{{ group.name }}</h5>
+                                            <p class="card-text text-muted small">
+                                                <i class="bi bi-people"></i> {{ group.students|length }} talaba
+                                            </p>
+                                            <hr>
+                                            <p class="small text-muted mb-1">
+                                                <i class="bi bi-clock-history"></i> 
+                                                Oxirgi kirish: 
+                                                {% if group.last_accessed %}
+                                                    {{ group.last_accessed.strftime('%d.%m.%Y %H:%M') }}
+                                                {% else %}
+                                                    Hali kirilmagan
+                                                {% endif %}
+                                            </p>
+                                            <p class="small text-muted mb-0">
+                                                <i class="bi bi-eye"></i> 
+                                                Kirishlar: {{ group.access_count }}
+                                            </p>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <button class="btn btn-sm btn-outline-primary w-100">
+                                                <i class="bi bi-arrow-right"></i> Ochish
+                                            </button>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">Guruhlar yo'q</h4>
+                        <p class="mb-0">Hali birorta guruh yaratilmagan</p>
+                        <a href="{{ url_for('main.students_add') }}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Talaba qo'shish
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+}
+</style>
+{% endblock %}

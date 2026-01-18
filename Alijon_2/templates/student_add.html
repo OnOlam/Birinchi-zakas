@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Talaba Qo'shish{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-plus"></i> Yangi Talaba Qo'shish
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.students_add') }}">
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">
+                            Familiya <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="last_name" 
+                               name="last_name" 
+                               required 
+                               autofocus
+                               placeholder="Valiyev">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">
+                            Ism <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="first_name" 
+                               name="first_name" 
+                               required
+                               placeholder="Ali">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="patronymic" class="form-label">
+                            Otchestvo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="patronymic" 
+                               name="patronymic" 
+                               required
+                               placeholder="Valiyevich">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="group_name" class="form-label">
+                            Guruh <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="group_name" 
+                               name="group_name" 
+                               required
+                               list="groups-list"
+                               placeholder="Python 101">
+                        <datalist id="groups-list">
+                            {% for group in groups %}
+                                <option value="{{ group.name }}">
+                            {% endfor %}
+                        </datalist>
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle"></i> 
+                            Agar guruh mavjud bo'lmasa, avtomatik yaratiladi
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Saqlash
+                        </button>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Bekor qilish
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Oxirgi qo'shilgan talabalar -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Oxirgi Qo'shilganlar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    Oxirgi qo'shilgan talabalar bu yerda ko'rinadi
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
