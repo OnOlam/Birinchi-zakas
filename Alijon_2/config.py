@@ -6,7 +6,7 @@ load_dotenv()
 class Config:
     """Base configuration"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-12345')
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///attendance.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres:ssCPUTJZUBmHNtXUKsOuxysvwQDkEJte@postgres.railway.internal:5432/railway')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 3))
     MAX_DEVICES = int(os.getenv('MAX_DEVICES', 3))
