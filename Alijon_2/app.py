@@ -8,6 +8,7 @@ from utils import *
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 from io import BytesIO
+import os
 
 app = Flask(__name__)
 app.config.from_object(get_config())
@@ -393,8 +394,5 @@ def utility_processor():
 
 if __name__ == '__main__':
     # Development
-    app.run(debug=True, host='0.0.0.0', port=5656)
-else:
-    # Production (Render, Heroku, etc.)
-    import logging
-    logging.basicConfig(level=logging.INFO)
+    port = int(os.environ.get("PORT", 5656))
+    app.run(host="0.0.0.0", port=port
