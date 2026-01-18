@@ -27,7 +27,7 @@ with app.app_context():
     # Admin yaratish (agar yo'q bo'lsa)
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin')
-        admin.set_password('admin123')
+        admin.set_password('a928100796')
         db.session.add(admin)
         db.session.commit()
         print("Admin yaratildi: username=admin, password=admin123")
