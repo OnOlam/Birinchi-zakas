@@ -6,3 +6,5 @@ Werkzeug==3.0.1
 openpyxl==3.1.2
 psycopg2-binary==2.9.9
 gunicorn==21.2.0
+fastapi==0.100.0
+unicorn[standard]==0.23.2
