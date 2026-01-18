@@ -389,5 +389,12 @@ def utility_processor():
         'today': date.today()
     }
 
+# ==================== PRODUCTION SETTINGS ====================
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Development
+    app.run(debug=True, host='0.0.0.0', port=5656)
+else:
+    # Production (Render, Heroku, etc.)
+    import logging
+    logging.basicConfig(level=logging.INFO)
